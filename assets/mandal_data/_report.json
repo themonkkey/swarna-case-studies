@@ -1,0 +1,117 @@
+{
+ "alur__alur": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "alur__aspari": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "alur__chippagiri": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "alur__devanakonda": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "alur__halaharvi": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "alur__holagunda": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "adoni__adoni": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "mantralayam__kosigi": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "mantralayam__kowthalam": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "mantralayam__mantralayam": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "mantralayam__peddakadubur": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "kodumursc__cbelagal": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "kodumursc__gudur": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "kodumursc__kodumur": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "kodumursc__kurnool": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "kodumursc__kurnool_u": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "yemmiganur__gonegandla": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "yemmiganur__nandavaram": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "yemmiganur__yemmiganur": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "yemmiganur__yemmiganur_u": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "kurnool__kurnool": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "pattikonda__krishnagiri": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "pattikonda__maddikera": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "pattikonda__mahanandi": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "pattikonda__pattikonda": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "pattikonda__tuggali": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "pattikonda__veldurthy": {
+  "status": "ok",
+  "layout": "A"
+ },
+ "_summary": {
+  "total": 27,
+  "parsed_layout_A": 27,
+  "parsed_layout_B": 0,
+  "failed": 0,
+  "success_rate": 100.0
+ }
+}

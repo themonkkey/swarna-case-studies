@@ -1,0 +1,535 @@
+/* ===========================================================================
+   Swarna Andhra — dashboard component library
+   Composes ONLY from the CSS custom properties already declared in
+   landing/index.html :root. No new colour literals except neutral
+   black/white alpha (matching the existing .vstage override pattern) and
+   sector colours supplied inline by the AP portal data itself.
+   =========================================================================== */
+
+/* A container query styles the container's DESCENDANTS, never the container
+   element itself — so the two-up rule below, which sets grid-template-columns on
+   .dash, cannot be carried by a container declared on .dash. It is declared on
+   .map-layout instead (see index.html); .dash spans that row's full width in the
+   split state, so the two measure the same thing. It used to sit on
+   #districtPanel, which is display:contents now and cannot be a container. */
+.dash,.d-tpl{
+  display:grid; grid-template-columns:1fr; gap:22px;
+  max-width:100%;
+}
+
+/* TRIED AND REJECTED — do not re-add without measuring.
+   Two columns inside the panel (@container dash, min-width 640px) looked like the
+   obvious fix for a tall panel. Measured at an 863px panel it made things WORSE:
+   4,402px tall against 3,830px in one column, because halving a card's width grows
+   its height by more than the second column saves. The win came from widening the
+   panel itself (the map column went 602px -> 342px), not from splitting it.
+   `d-sec--wide` is kept on the sections that would need it, so the idea is one CSS
+   rule away if the panel ever gets genuinely wide. */
+.dash *,.dash *::before,.dash *::after,
+.d-tpl *,.d-tpl *::before,.d-tpl *::after{box-sizing:border-box;}
+
+/* Two-up, but only once the dashboard genuinely has the room.
+   The note above is still true at panel widths: halving a card there grew its
+   height by more than the second column saved. It stops being true once .dash
+   spans the whole layout instead of a 68% column — at 1100px each column is
+   still ~530px, about what the old panel gave a card at full width, so nothing
+   is being squeezed.
+   The headline card (stats and sparklines) and the drill list of child places
+   stay full width: the first is a row of figures that should read across, the
+   second is a name grid that reflows to fill whatever width it is given. Both
+   are matched structurally rather than by template, so all twelve archetypes
+   get the same shape without per-template edits. */
+@container dash (min-width:1040px){
+  .dash,.d-tpl{grid-template-columns:1fr 1fr;}
+  .d-sec:first-child,
+  .d-sec:last-child,
+  .d-sec--wide,
+  .d-sec:has(.d-drill-lbl),
+  .d-sec:has(.d-stats){grid-column:1 / -1;}
+}
+
+/* ---------- section wrapper ---------- */
+.d-sec{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:var(--r-lg);
+  -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
+  box-shadow:var(--neu-out);
+  padding:clamp(16px,2.4vw,26px);
+  max-width:100%; min-width:0;
+}
+.d-sec > .d-sec-h{
+  display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  margin:0 0 14px; padding:0 0 10px;
+  border-bottom:1px solid var(--hair);
+}
+.d-sec-h h4{
+  margin:0; font-size:.98rem; font-weight:700; letter-spacing:-.01em;
+  color:var(--ink);
+}
+.d-sec-h .d-sec-note{
+  font-size:.72rem; color:var(--label-3); font-weight:500;
+}
+.d-sec-b{min-width:0;}
+
+/* ---------- stat card ---------- */
+.d-stats{
+  display:grid; gap:12px;
+  grid-template-columns:repeat(auto-fit,minmax(172px,1fr));
+}
+.d-stat{
+  background:var(--glass-strong);
+  border:1px solid var(--glass-border);
+  border-radius:var(--r);
+  box-shadow:var(--neu-out);
+  padding:14px 16px; min-width:0;
+}
+.d-stat .d-stat-l{
+  display:block; font-size:.68rem; font-weight:700;
+  letter-spacing:.09em; text-transform:uppercase;
+  color:var(--label-2); margin-bottom:7px;
+}
+.d-stat .d-stat-v{
+  display:block; font-size:clamp(1.15rem,1.5vw,1.45rem);
+  font-weight:700; line-height:1.1; letter-spacing:-.02em;
+  color:var(--label); overflow-wrap:anywhere;
+}
+.d-stat .d-stat-s{
+  display:block; margin-top:6px; font-size:.72rem; line-height:1.35;
+  color:var(--label-3);
+}
+.d-stat .d-stat-d{
+  display:inline-block; margin-top:8px;
+  font-size:.7rem; font-weight:700;
+  padding:3px 9px; border-radius:999px;
+  background:rgba(36,138,61,.12); color:var(--green);
+}
+.d-stat .d-stat-d.is-down{
+  background:rgba(60,60,67,.10); color:var(--label-2);
+}
+
+/* ---------- donut ---------- */
+.d-donut{
+  display:flex; align-items:center; gap:clamp(14px,3vw,28px);
+  flex-wrap:wrap; min-width:0;
+}
+.d-donut-svg{
+  flex:0 0 auto; width:clamp(132px,30%,168px); height:auto; max-width:100%;
+}
+.d-donut-svg .d-seg{
+  transition:opacity .25s ease, stroke-width .25s ease;
+}
+.d-donut-svg .d-seg.is-dim{opacity:.42;}
+/* font-size inside an SVG resolves in USER UNITS, and the viewBox is 42
+   units wide — so these are deliberately small numbers, not px. */
+.d-donut-c1{
+  font-size:7.2px; font-weight:700; fill:var(--label);
+  letter-spacing:-.2px;
+}
+.d-donut-c2{
+  font-size:2.5px; font-weight:600; fill:var(--label-3);
+  letter-spacing:.28px; text-transform:uppercase;
+}
+.d-legend{
+  flex:1 1 190px; min-width:0;
+  display:flex; flex-direction:column; gap:9px; margin:0; padding:0;
+  list-style:none;
+}
+.d-legend li{
+  display:flex; align-items:center; gap:9px;
+  font-size:.82rem; color:var(--label);
+  padding-bottom:8px; border-bottom:1px solid var(--hair);
+}
+.d-legend li:last-child{border-bottom:0; padding-bottom:0;}
+.d-legend li.is-emph{font-weight:700;}
+.d-legend .d-dot{
+  flex:0 0 auto; width:11px; height:11px; border-radius:4px;
+}
+.d-legend .d-lg-n{flex:1 1 auto; min-width:0;}
+.d-legend .d-lg-v{flex:0 0 auto; font-variant-numeric:tabular-nums; font-weight:700;}
+
+/* ---------- growth bullet ---------- */
+.d-bul{display:flex; flex-direction:column; gap:15px; min-width:0;}
+.d-bul-row{min-width:0;}
+.d-bul-hd{
+  display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+  margin-bottom:6px;
+}
+.d-bul-hd .d-bul-n{
+  font-size:.84rem; font-weight:600; color:var(--label);
+  flex:1 1 auto; min-width:0;
+}
+.d-bul-row.is-emph .d-bul-n{font-weight:800;}
+.d-bul-hd .d-bul-cagr{
+  flex:0 0 auto; font-size:.7rem; font-weight:700;
+  padding:2px 8px; border-radius:999px;
+  background:rgba(36,138,61,.12); color:var(--green);
+  font-variant-numeric:tabular-nums;
+}
+/* Rounding lives on the track, not on shapes inside the SVG: the SVG scales
+   horizontally only, so any rx in there would stretch into an ellipse. */
+.d-bul-track{
+  width:100%; max-width:100%; height:14px; overflow:hidden;
+  border-radius:7px; background:rgba(60,60,67,.09);
+  box-shadow:var(--neu-in);
+}
+.d-bul-svg{display:block; width:100%; height:14px;}
+.d-bul-ft{
+  display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  margin-top:5px; font-size:.71rem; color:var(--label-3);
+  font-variant-numeric:tabular-nums;
+}
+.d-bul-key{
+  display:flex; gap:16px; flex-wrap:wrap; align-items:center;
+  margin-top:2px; padding-top:11px; border-top:1px solid var(--hair);
+  font-size:.71rem; color:var(--label-2);
+}
+.d-bul-key span{display:inline-flex; align-items:center; gap:7px;}
+.d-bul-key i{
+  width:20px; height:11px; border-radius:3px; display:inline-block;
+  background:var(--label-3);
+}
+.d-bul-key i.d-k-g{background:var(--label-3); opacity:.28;}
+.d-bul-key i.d-k-t{
+  background:transparent; width:0; height:13px; border-radius:0;
+  border:0; border-left:2px dashed var(--label-2);
+}
+
+/* ---------- composition bars ---------- */
+.d-comp{display:flex; flex-direction:column; gap:12px; min-width:0;}
+.d-comp-row{min-width:0;}
+.d-comp-hd{
+  display:flex; justify-content:space-between; gap:10px;
+  font-size:.8rem; color:var(--label); margin-bottom:5px;
+}
+.d-comp-hd b{font-variant-numeric:tabular-nums;}
+.d-comp-track{
+  height:10px; border-radius:999px; width:100%; overflow:hidden;
+  background:rgba(60,60,67,.10); box-shadow:var(--neu-in);
+}
+.d-comp-fill{
+  height:100%; border-radius:999px; min-width:2px;
+  background:var(--green);
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+
+/* ---------- thrust chips ---------- */
+.d-chips{
+  display:flex; flex-wrap:wrap; gap:9px; margin:0; padding:0; list-style:none;
+}
+.d-chip{
+  display:inline-block; padding:7px 14px; border-radius:999px;
+  font-size:.78rem; font-weight:600; line-height:1.25;
+  color:var(--ink);
+  background:var(--glass-strong);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--neu-out);
+}
+
+/* ---------- narrative ---------- */
+.d-narr{font-size:.9rem; line-height:1.62; color:var(--label-2); min-width:0;}
+.d-narr > *:first-child{margin-top:0;}
+.d-narr > *:last-child{margin-bottom:0;}
+.d-narr p{margin:0 0 .85em;}
+.d-narr strong,.d-narr b{color:var(--label); font-weight:700;}
+.d-narr ul,.d-narr ol{margin:0 0 .85em; padding-left:1.15em;}
+.d-narr li{margin-bottom:.35em;}
+.d-narr h1,.d-narr h2,.d-narr h3,.d-narr h4,.d-narr h5,.d-narr h6{
+  font-size:.9rem; font-weight:700; color:var(--ink); margin:1.1em 0 .5em;
+}
+.d-narr a{color:var(--teal); text-decoration:underline;}
+.d-narr img,.d-narr table{max-width:100%;}
+.d-narr table{display:block; overflow-x:auto; border-collapse:collapse;}
+
+/* ---------- drill list ---------- */
+.d-drill{
+  display:grid; gap:9px; margin:0; padding:0; list-style:none;
+  grid-template-columns:repeat(auto-fill,minmax(178px,1fr));
+}
+.d-drill-lbl{
+  font-size:.68rem; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--label-2); margin:0 0 10px;
+}
+.d-drill-i{min-width:0;}
+.d-drill-i > *{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  width:100%; text-align:left;
+  font:inherit; font-size:.82rem; font-weight:600; color:var(--label);
+  padding:11px 14px; border-radius:var(--r);
+  background:var(--glass-strong);
+  border:1px solid var(--glass-border);
+  box-shadow:var(--neu-out);
+  min-width:0;
+}
+.d-drill-i button{cursor:pointer; transition:transform .18s ease, box-shadow .18s ease;}
+.d-drill-i button:hover{transform:translateY(-2px);}
+.d-drill-i button:focus-visible{outline:2px solid var(--green); outline-offset:2px;}
+.d-drill-i .d-drill-n{
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.d-drill-i .d-drill-a{flex:0 0 auto; color:var(--label-3); font-weight:700;}
+
+/* ---------- rank strip ---------- */
+.d-rank{display:flex; flex-direction:column; gap:8px; min-width:0;}
+.d-rank-lbl{
+  font-size:.68rem; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--label-2); margin:0;
+}
+.d-rank-peer{
+  display:grid; grid-template-columns:minmax(0,1fr) 3.4fr auto;
+  align-items:center; gap:10px; font-size:.79rem; color:var(--label-2);
+}
+.d-rank-peer .d-rank-n{
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.d-rank-peer .d-rank-t{
+  height:9px; border-radius:999px; width:100%;
+  background:rgba(60,60,67,.10); box-shadow:var(--neu-in); overflow:hidden;
+}
+.d-rank-peer .d-rank-f{
+  height:100%; border-radius:999px; min-width:2px;
+  background:var(--label-3);
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.d-rank-peer .d-rank-v{font-variant-numeric:tabular-nums; font-weight:600;}
+.d-rank-peer.is-self{color:var(--label); font-weight:700;}
+.d-rank-peer.is-self .d-rank-f{background:var(--green);}
+
+/* ---------- source note ---------- */
+.d-src{
+  display:block; margin-top:2px;
+  font-size:.71rem; line-height:1.5; color:var(--label-3);
+  padding-left:11px; border-left:2px solid var(--hair);
+}
+
+/* ---------- empty state (calm, not an error) ---------- */
+.d-empty{
+  display:flex; align-items:flex-start; gap:6px 11px; flex-wrap:wrap;
+  border-radius:var(--r);
+  border:1px dashed var(--hair);
+  background:rgba(60,60,67,.03);
+  padding:15px 17px; font-size:.82rem; line-height:1.5;
+  color:var(--label-2); min-width:0;
+}
+.d-empty .d-empty-k{
+  flex:0 0 auto; font-size:.66rem; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--label-3);
+  padding-top:.15em;
+}
+.d-empty .d-empty-r{flex:1 1 150px; min-width:0;}
+
+/* ===========================================================================
+   Dark stage — light-on-dark, following the existing .vstage pattern
+   =========================================================================== */
+.vstage .d-sec,
+.vstage .d-stat,
+.vstage .d-chip,
+.vstage .d-drill-i > *{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:none;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+}
+.vstage .d-sec-h{border-bottom-color:rgba(255,255,255,.14);}
+.vstage .d-sec-h h4{color:#FFF;}
+.vstage .d-sec-h .d-sec-note{color:rgba(255,255,255,.55);}
+
+.vstage .d-stat .d-stat-l{color:rgba(255,255,255,.62);}
+.vstage .d-stat .d-stat-v{color:#FFF;}
+.vstage .d-stat .d-stat-s{color:rgba(255,255,255,.55);}
+.vstage .d-stat .d-stat-d{background:rgba(198,255,106,.18); color:var(--lime);}
+.vstage .d-stat .d-stat-d.is-down{background:rgba(255,255,255,.12); color:rgba(255,255,255,.72);}
+
+.vstage .d-donut-c1{fill:#FFF;}
+.vstage .d-donut-c2{fill:rgba(255,255,255,.58);}
+.vstage .d-legend li{color:rgba(255,255,255,.86); border-bottom-color:rgba(255,255,255,.12);}
+
+.vstage .d-bul-hd .d-bul-n{color:rgba(255,255,255,.92);}
+.vstage .d-bul-hd .d-bul-cagr{background:rgba(198,255,106,.18); color:var(--lime);}
+.vstage .d-bul-ft{color:rgba(255,255,255,.58);}
+.vstage .d-bul-key{color:rgba(255,255,255,.66); border-top-color:rgba(255,255,255,.12);}
+.vstage .d-bul-key i{background:rgba(255,255,255,.5);}
+.vstage .d-bul-key i.d-k-g{background:rgba(255,255,255,.5); opacity:.3;}
+.vstage .d-bul-key i.d-k-t{background:transparent; border-left-color:rgba(255,255,255,.7);}
+.vstage .d-bul-track{background:rgba(255,255,255,.13); box-shadow:none;}
+
+.vstage .d-comp-hd{color:rgba(255,255,255,.88);}
+.vstage .d-comp-track,
+.vstage .d-rank-peer .d-rank-t{background:rgba(255,255,255,.13); box-shadow:none;}
+.vstage .d-comp-fill{background:var(--lime);}
+
+.vstage .d-chip{color:var(--lime);}
+
+.vstage .d-narr{color:rgba(255,255,255,.76);}
+.vstage .d-narr strong,.vstage .d-narr b{color:#FFF;}
+.vstage .d-narr h1,.vstage .d-narr h2,.vstage .d-narr h3,
+.vstage .d-narr h4,.vstage .d-narr h5,.vstage .d-narr h6{color:#FFF;}
+.vstage .d-narr a{color:var(--lime);}
+
+.vstage .d-drill-lbl,.vstage .d-rank-lbl{color:rgba(255,255,255,.62);}
+.vstage .d-drill-i > *{color:#FFF;}
+.vstage .d-drill-i .d-drill-a{color:var(--lime);}
+.vstage .d-drill-i button:focus-visible{outline-color:var(--lime);}
+
+.vstage .d-rank-peer{color:rgba(255,255,255,.66);}
+.vstage .d-rank-peer .d-rank-f{background:rgba(255,255,255,.42);}
+.vstage .d-rank-peer.is-self{color:#FFF;}
+.vstage .d-rank-peer.is-self .d-rank-f{background:var(--lime);}
+
+.vstage .d-src{color:rgba(255,255,255,.52); border-left-color:rgba(255,255,255,.18);}
+
+.vstage .d-empty{
+  background:rgba(255,255,255,.05);
+  border-color:rgba(255,255,255,.18);
+  color:rgba(255,255,255,.72);
+}
+.vstage .d-empty .d-empty-k{color:rgba(255,255,255,.5);}
+
+/* ---------- motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  .dash *,.dash *::before,.dash *::after{
+    transition:none !important; animation:none !important;
+  }
+  .d-drill-i button:hover{transform:none;}
+}
+
+/* ---------- narrow screens ---------- */
+@media (max-width:520px){
+  .d-donut{flex-direction:column; align-items:stretch;}
+  .d-donut-svg{width:min(180px,60%); align-self:center;}
+  .d-rank-peer{grid-template-columns:minmax(0,1fr) 2fr auto; font-size:.74rem;}
+}
+
+/* ---------- composition ribbon ---------- */
+/* The direct labels are load-bearing, not decoration: the three series sit at
+   tritan ΔE 7.1 (the 6–8 floor band), which is only legal with a secondary
+   encoding. Do not "clean up" the labels. */
+.d-ribbon{margin:0;}
+.d-ribbon svg{width:100%;height:auto;display:block;overflow:visible;}
+.d-rb-lbl{font-size:12px;font-weight:600;letter-spacing:-.01em;fill:var(--label);}
+.d-rb-val{font-size:12px;font-variant-numeric:tabular-nums;fill:var(--label-2);}
+.d-rb-ax{font-size:11px;font-variant-numeric:tabular-nums;fill:var(--label-3);}
+.d-rb-keys{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 12px;}
+.d-rb-key{display:inline-flex;align-items:center;gap:7px;font-size:12px;
+  color:var(--label-2);letter-spacing:-.006em;}
+.d-rb-key i{width:9px;height:9px;border-radius:3px;flex:none;}
+.vstage .d-rb-lbl{fill:rgba(255,255,255,.92);}
+.vstage .d-rb-val{fill:rgba(255,255,255,.62);}
+.vstage .d-rb-ax{fill:rgba(255,255,255,.45);}
+.vstage .d-rb-key{color:rgba(255,255,255,.66);}
+
+/* ---------- composition bars (chart form) ---------- */
+/* Replaces three independent progress tracks with one plot on a shared axis:
+   MUI-style light gridlines, category labels in a left gutter, 4px rounded
+   data-ends, value at the end of each bar, native <title> hover. */
+.d-comp{margin:0;}
+.d-comp svg{width:100%;height:auto;display:block;overflow:visible;}
+.d-cb-grid{stroke:var(--hair);stroke-width:1;shape-rendering:crispEdges;}
+.d-cb-track{fill:rgba(60,60,67,.07);}
+.d-cb-bar{transition:opacity .18s ease;}
+.d-cb-row:hover .d-cb-bar{opacity:.82;}
+.d-cb-cat{font-size:12.5px;font-weight:600;letter-spacing:-.01em;fill:var(--label);}
+.d-cb-val{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;fill:var(--label);}
+.d-cb-tick{font-size:11px;font-variant-numeric:tabular-nums;fill:var(--label-3);}
+.vstage .d-cb-grid{stroke:rgba(255,255,255,.14);}
+.vstage .d-cb-track{fill:rgba(255,255,255,.07);}
+.vstage .d-cb-cat{fill:rgba(255,255,255,.9);}
+.vstage .d-cb-val{fill:rgba(255,255,255,.95);}
+.vstage .d-cb-tick{fill:rgba(255,255,255,.45);}
+
+/* ---------- MUI chart islands ---------- */
+/* React mounts into these after the panel paints; empty until then, which is why
+   nothing here sets a background — an unmounted placeholder must be invisible. */
+.d-mui{width:100%;min-width:0;}
+.d-mui-spark{margin-top:8px;}
+.d-sparkrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hair);}
+.d-spark-l{display:block;font-size:.68rem;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--label-2);margin-bottom:2px;}
+
+/* ---------- sector dot plot ---------- */
+.d-sd-stem{stroke:var(--hair);stroke-width:2;}
+.d-sd-dot{fill:#6FA817;stroke:var(--surface);stroke-width:1.5;}
+.d-sd-rank{font-size:10.5px;fill:var(--label-3);}
+.d-sd-row:hover .d-sd-dot{fill:#5a8c13;}
+.vstage .d-sd-stem{stroke:rgba(255,255,255,.16);}
+.vstage .d-sd-dot{fill:#8FC93A;stroke:rgba(11,46,32,.6);}
+.vstage .d-sd-rank{fill:rgba(255,255,255,.45);}
+
+/* ---------- breadcrumb header + rank badge ---------- */
+.d-sec-aside{margin-left:auto;flex:0 0 auto;}
+.d-crumb-self{font-weight:700;}
+.d-crumb-kind{font-weight:600;color:var(--label-2);margin-left:7px;}
+.d-crumb-path{font-weight:500;font-size:.82em;}
+.d-crumb-j{color:var(--label-3);margin:0 4px 0 2px;}
+/* now a button: reset the UA chrome, keep the crumb's typography, and show it
+   is a route with an underline on hover rather than a boxy control */
+.d-crumb-parent{color:var(--label-2);font:inherit;background:none;border:0;padding:0;
+  cursor:pointer;text-decoration:underline;text-decoration-color:transparent;
+  text-underline-offset:3px;transition:color .15s ease,text-decoration-color .15s ease;}
+.d-crumb-parent:hover{color:var(--lime,#C6FF6A);text-decoration-color:currentColor;}
+.d-crumb-parent:focus-visible{outline:2px solid var(--lime,#C6FF6A);outline-offset:2px;border-radius:4px;}
+.d-crumb-pk{color:var(--label-3);}
+.vstage .d-crumb-kind,.vstage .d-crumb-parent{color:rgba(255,255,255,.66);}
+.vstage .d-crumb-j,.vstage .d-crumb-pk{color:rgba(255,255,255,.42);}
+.d-rankbadge{display:inline-flex;flex-direction:column;align-items:flex-end;
+  gap:1px;padding:6px 13px;border-radius:12px;line-height:1.15;
+  background:var(--glass-strong);border:1px solid var(--glass-border);
+  box-shadow:var(--neu-out);}
+.d-rb-pos{font-size:1.15rem;font-weight:800;letter-spacing:-.02em;color:var(--label);
+  font-variant-numeric:tabular-nums;}
+.d-rb-hash{color:var(--green);margin-right:1px;}
+.d-rb-of{font-size:.62em;font-weight:600;color:var(--label-3);margin-left:5px;}
+.d-rb-basis{font-size:.64rem;font-weight:600;letter-spacing:.02em;color:var(--label-2);
+  text-transform:uppercase;}
+/* On the dark stage the badge kept its light-theme shell — --glass-strong is 78%
+   white and --neu-out carries a 75% white outer glow — so it burned a halo into
+   the green. Restate the shell for the dark stage instead of inheriting it.
+   min-width holds the box steady across "#7 of 28" and "#24 of 28" so the badge
+   does not resize as the user moves between places. */
+/* Content is CENTRED here, not flush right. The badge inherits
+   align-items:flex-end, which is right for a box that shrinks to its content —
+   but once a min-width reserves a stable box, flush-right leaves all the slack on
+   one side (measured 100px left vs 14px right) and the number reads as falling
+   off the edge. Centring divides the slack evenly.
+   min-width only has to cover the rank line; the uppercase basis line underneath
+   is longer and constant, so it already pins the box width across "#7 of 28" and
+   "#24 of 28". */
+.vstage .d-rankbadge{min-width:8.5rem;align-items:center;text-align:center;
+  background:rgba(255,255,255,.07);
+  border-color:rgba(255,255,255,.16);
+  box-shadow:0 8px 24px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);}
+/* baseline-lock the rank line so "of 28" sits on the number's baseline instead of
+   drifting with its own smaller line-box */
+.vstage .d-rb-pos{display:flex;align-items:baseline;justify-content:center;}
+.vstage .d-rb-pos{color:#FFF;}
+.vstage .d-rb-hash{color:var(--lime,#8FC93A);}
+.vstage .d-rb-of{color:rgba(255,255,255,.5);}
+.vstage .d-rb-basis{color:rgba(255,255,255,.62);}
+
+/* ===========================================================================
+   Brief — the written highlights card that leads every panel. Reuses the .d-sec
+   card shell; this only styles the kicker and the sentence list.
+   =========================================================================== */
+.d-brief{margin-bottom:clamp(12px,1.6vw,16px);}
+.d-brief-k{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:#5c7a1e;margin-bottom:9px;}
+.d-brief-l{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+.d-brief-l li{position:relative;padding-left:16px;font-size:13.8px;line-height:1.55;
+  color:rgba(20,40,30,.82);}
+.d-brief-l li::before{content:"";position:absolute;left:1px;top:.58em;width:6px;height:6px;
+  border-radius:50%;background:#8FC93A;}
+.d-brief-l b{font-weight:700;color:#0B2E20;}
+
+.vstage .d-brief-k{color:var(--lime,#C6EC8F);}
+.vstage .d-brief-l li{color:rgba(255,255,255,.82);}
+.vstage .d-brief-l li::before{background:var(--lime,#8FC93A);}
+.vstage .d-brief-l b{color:#FFF;}
+
+/* the woven-paragraph form of the brief — one flowing block of prose */
+.d-brief-p{margin:0;font-size:14px;line-height:1.72;letter-spacing:-.004em;
+  color:rgba(20,40,30,.82);max-width:72ch;}
+.d-brief-p b{font-weight:700;color:#0B2E20;}
+.vstage .d-brief-p{color:rgba(255,255,255,.84);}
+.vstage .d-brief-p b{color:#FFF;}
