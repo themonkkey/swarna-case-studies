@@ -5315,7 +5315,10 @@ const LOOP_SCRIM = {
 })();
 
 // ---------- router ----------
-const pages = ['home','about','methodology','calculator','districts','capacity','cases'];
+/* Standalone build: this site serves one page. The rest of the SPA's markup
+   is still underneath, but no route reaches it - every other page name, and
+   any stale #districts/... link or history entry, lands here. */
+const pages = ['cases'];
 /* Capacity building and Case studies are nav items that open a tab inside the
    Districts page, so three nav buttons share data-page="districts" and the old
    "highlight anything matching the page" rule lit all three at once. An item
