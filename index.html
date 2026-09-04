@@ -1232,6 +1232,8 @@ a.docs-leaf:hover .ext{opacity:1;}
 /* Case studies view — grouped card grid, each card links out to a standalone
    reader page (landing/cases/<slug>.html). Same dark-stage frosting as the
    Documents tree, since it shares the .vstage video background. */
+.cases-intro{max-width:860px;margin:0 0 clamp(20px,2.6vw,30px);}
+.cases-intro p{font-size:15.5px;line-height:1.65;color:rgba(255,255,255,.78);margin:0;}
 .cases-group{margin-bottom:clamp(26px,3.5vw,40px);}
 .cases-group > h3{font-size:clamp(15px,1.8vw,18px);font-weight:700;color:#fff;
   letter-spacing:-.01em;margin:0 0 4px;}
@@ -4671,9 +4673,17 @@ details.fc-assump[open] .fc-assump-act .lbl-close{display:inline;}
   <section class="section vstage" data-vid="longexposure"><div class="wrap">
     <div class="sec-head sec-head-row">
       <div>
-        <h2>Capacity-building case studies</h2>
-        <p>The case studies discussed in the programme, each downloadable as a slide deck in English and Telugu.</p>
+        <h2>Case study library</h2>
+        <p>What worked elsewhere, written for the officer who could make it work here.</p>
       </div>
+    </div>
+    <div class="cases-intro">
+      <p>These case studies were discussed through the capacity-building programme of the
+      Andhra Pradesh Planning Department, delivered by Pahl&eacute; India Foundation across
+      all 28 districts. Some make the case for action in a specific district; others are
+      clusters and models from elsewhere in India, framed for district and mandal officers
+      to adapt. Each opens as a slide deck in the browser and is downloadable in English
+      and Telugu.</p>
     </div>
     <div id="casesPageBody" aria-live="polite">
       <div class="docs-loading">Loading the case study library…</div>
@@ -6798,13 +6808,14 @@ document.querySelectorAll('a[href*="andhrachatbot.streamlit.app"]').forEach(func
       .then(function(r){ return r.ok ? r.json() : Promise.reject(r.status); })
       .then(function(d){
         var has = function(c){ return !!c.decks; };
+        /* One shelf, not two: the district-brief / replicable-model split is a
+           sentence in the intro now, and the standalone library reads as a
+           single collection. District briefs lead, models follow. */
+        var all = d.ap.filter(has).concat(d.model.filter(has));
         body.innerHTML =
-          group('Andhra Pradesh districts',
-                'Case-for-action briefs tied to a specific district.',
-                d.ap.filter(has)) +
-          group('Replicable models',
-                'Clusters and models from elsewhere, framed for district and mandal officers.',
-                d.model.filter(has));
+          group('The case studies',
+                all.length + ' decks \u00b7 district briefs first, replicable models after.',
+                all);
       })
       .catch(function(err){
         built = false;   // a dropped connection should not poison the next visit
